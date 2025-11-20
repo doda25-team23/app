@@ -1,0 +1,32 @@
+# Build output
+target/
+!target/*.jar
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+.settings/
+.project
+.classpath
+
+# Git
+.git/
+.gitignore
+
+# Maven
+.mvn/
+mvnw
+mvnw.cmd
+
+# Documentation
+README.md
+*.md
+
+# Tests (keep in build, but could exclude if needed)
+# src/test/
+
+# OS
+.DS_Store
+Thumbs.db
