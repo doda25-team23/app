@@ -1,29 +1,38 @@
+# ===========================
 # Stage 1: Build the application
+# ===========================
 FROM maven:3.9-eclipse-temurin-25-alpine AS build
 
 WORKDIR /app
 
-# Copy pom.xml and download dependencies (for better caching)
+# Copy pom.xml and download dependencies (improves caching)
 COPY pom.xml .
 RUN mvn dependency:go-offline -B
 
-# Copy source code and build
+# Copy source code and build the jar
 COPY src ./src
 RUN mvn clean package -DskipTests
 
-# Stage 2: Create the runtime image
+
+# ===========================
+# Stage 2: Runtime Image
+# ===========================
 FROM eclipse-temurin:25-jre-alpine
 
 WORKDIR /app
 
-# Copy the JAR from build stage
+# Copy built jar
 COPY --from=build /app/target/*.jar app.jar
 
-# Expose the application port
-EXPOSE 8080
+# ===== F6: Flexible configuration =====
+# Default app port
+ENV APP_PORT=8080
 
-# Set default environment variable for model service
+# Default backend host (model-service)
 ENV MODEL_HOST=http://model-service:8081
 
-# Run the application
-ENTRYPOINT ["java", "-jar", "app.jar"]
+# Expose dynamic port
+EXPOSE ${APP_PORT}
+
+# Run Spring Boot with dynamic port + model host
+ENTRYPOINT ["sh", "-c", "java -jar app.jar --server.port=${APP_PORT} --model.host=${MODEL_HOST}"]
