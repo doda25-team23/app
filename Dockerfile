@@ -5,6 +5,14 @@ FROM maven:3.9-eclipse-temurin-25-alpine AS build
 
 WORKDIR /app
 
+# Build args for GitHub Packages authentication
+ARG GITHUB_ACTOR
+ARG GITHUB_TOKEN
+
+# Create Maven settings.xml with GitHub Packages credentials
+RUN mkdir -p /root/.m2 && \
+    echo '<settings><servers><server><id>github</id><username>'${GITHUB_ACTOR}'</username><password>'${GITHUB_TOKEN}'</password></server></servers></settings>' > /root/.m2/settings.xml
+
 # Copy pom.xml and download dependencies (improves caching)
 COPY pom.xml .
 RUN mvn dependency:go-offline -B
@@ -12,6 +20,9 @@ RUN mvn dependency:go-offline -B
 # Copy source code and build the jar
 COPY src ./src
 RUN mvn clean package -DskipTests
+
+# Remove credentials from build stage
+RUN rm -f /root/.m2/settings.xml
 
 
 # ===========================
