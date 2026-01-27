@@ -32,18 +32,22 @@ FROM eclipse-temurin:25-jre-alpine
 
 WORKDIR /app
 
+# Install curl so the health check can call the actuator endpoint
+RUN apk add --no-cache curl
+
 # Copy built jar
 COPY --from=build /app/target/*.jar app.jar
 
 # ===== F6: Flexible configuration =====
-# Default app port
 ENV APP_PORT=8080
-
-# Default backend host (model-service)
 ENV MODEL_HOST=http://model-service:8081
 
-# Expose dynamic port
 EXPOSE ${APP_PORT}
 
 # Run Spring Boot with dynamic port + model host
 ENTRYPOINT ["sh", "-c", "java -jar app.jar --server.port=${APP_PORT} --model.host=${MODEL_HOST}"]
+
+# Define a health check that pings the Spring Boot actuator
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+  CMD curl -fsS "http://localhost:${APP_PORT}/actuator/health" || exit 1
+
