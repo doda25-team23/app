@@ -14,6 +14,9 @@ import org.springframework.web.bind.annotation.*;
 import frontend.data.Sms;
 import jakarta.servlet.http.HttpServletRequest;
 
+// F1: Import the version-aware library
+import doda25.team23.VersionUtil;
+
 @Controller
 @RequestMapping(path = "/sms")
 public class FrontendController {
@@ -29,6 +32,8 @@ public class FrontendController {
         this.metrics = metrics;
         this.modelHost = env.getProperty("MODEL_HOST");
         assertModelHost();
+        // F1: Log lib-version at startup
+        System.out.printf("lib-version: %s%n", VersionUtil.getVersion());
     }
 
 
@@ -57,6 +62,8 @@ public class FrontendController {
     public String index(Model m) {
         metrics.userVisitedHome();
         m.addAttribute("hostname", modelHost);
+        // F1: Add lib-version to model for display in UI
+        m.addAttribute("libVersion", VersionUtil.getVersion());
         return "sms/index";
     }
 
