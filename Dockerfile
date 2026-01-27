@@ -39,9 +39,13 @@ RUN apk add --no-cache curl
 COPY --from=build /app/target/*.jar app.jar
 
 # ===== F6: Flexible configuration =====
+# Default app port
 ENV APP_PORT=8080
+
+# Default backend host (model-service)
 ENV MODEL_HOST=http://model-service:8081
 
+# Expose dynamic port
 EXPOSE ${APP_PORT}
 
 # Run Spring Boot with dynamic port + model host
